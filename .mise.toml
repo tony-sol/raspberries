@@ -1,0 +1,7 @@
+[tools]
+ansible = "latest"
+doggo = "latest"
+gron = "latest"
+ripgrep = "latest"
+task = "latest"
+yq = "latest"

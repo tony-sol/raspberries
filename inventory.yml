@@ -1,0 +1,15 @@
+master:
+  hosts:
+    raspberry-01:
+slave:
+  hosts:
+    raspberry-02:
+storage:
+  children:
+    hdd:
+      hosts:
+        raspberry-02:
+    ssd:
+      hosts:
+        raspberry-01:
+        raspberry-02:
