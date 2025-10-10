@@ -1,0 +1,21 @@
+#SPDX-License-Identifier: MIT-0
+---
+
+- name: Install podman
+  become: true
+  package:
+    name: podman
+    state: latest
+    update_cache: true
+
+- name: Enable podman.socket service
+  systemd_service:
+    name: podman.socket
+    enabled: true
+    state: started
+    scope: user
+  register: result
+
+- debug:
+    msg: "Remote socket path: {{ result.status.RequiresMountsFor }}"
+  when: result.status.Result == "success"
