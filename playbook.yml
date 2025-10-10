@@ -1,0 +1,16 @@
+- name: Provision
+  hosts: all
+  roles:
+    # @todo create common role with e.g. node_exporter
+    # - role: common
+    #   tags:
+    #     - common
+    - role: user
+      tags:
+        - user
+    - role: tailscale
+      tags:
+        - tailscale
+    - role: podman
+      tags:
+        - podman
