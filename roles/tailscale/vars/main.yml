@@ -1,0 +1,7 @@
+#SPDX-License-Identifier: MIT-0
+---
+# @see https://login.tailscale.com/admin/settings/keys
+tailscale_auth_key:
+
+tailscale_tags:
+  - cluster-node
