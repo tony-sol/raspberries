@@ -1,0 +1,30 @@
+#SPDX-License-Identifier: MIT-0
+---
+user_shell_files:
+  - .profile
+  - .bashrc
+  - .bash_profile
+  - .bash_login
+  - .bash_logout
+  - .bash_history
+  - .zshenv
+  - .zprofile
+  - .zshrc
+  - .zlogin
+  - .zlogout
+  - .zsh_history
+  - .zcompdump
+  - .sudo_as_admin_successful
+
+user_base_directories:
+  - .config
+  - .local
+  - .cache
+
+user_packages:
+  - bat
+  - fzf
+  - htop
+  - tree
+  - vim
+  - zsh

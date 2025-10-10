@@ -1,0 +1,67 @@
+#SPDX-License-Identifier: MIT-0
+---
+- name: Gathering facts
+  setup:
+    filter:
+      - ansible_user_id
+      - ansible_user_dir
+
+- name: Install packages
+  become: true
+  loop: "{{ user_packages }}"
+  package:
+    name: "{{ item }}"
+    state: latest
+
+- name: Cleanup user home
+  loop: "{{ user_shell_files + user_base_directories | unique }}"
+  file:
+    path: "{{ ansible_user_dir }}/{{ item }}"
+    state: absent
+
+- name: Clone configs
+  git:
+    accept_newhostkey: true
+    repo: git@github.com:tony-sol/.config.git
+    depth: 1
+    force: true
+    update: true
+    recursive: true
+    dest: "{{ ansible_user_dir }}/.config"
+
+- name: Populate configs
+  copy:
+    src: ".config/"
+    dest: "{{ ansible_user_dir }}/.config/"
+    decrypt: true
+    mode: preserve
+
+- find:
+    paths: "{{ ansible_user_dir }}/.config/ssh/"
+    hidden: true
+    follow: true
+    file_type: any
+    exclude:
+      - '*.md'
+      - '.git*'
+  register: files
+
+- name: Populate ssh
+  copy:
+    remote_src: true
+    src: "{{ item.path }}"
+    dest: "{{ ansible_user_dir }}/.ssh/"
+  loop: "{{ files.files }}"
+  when: files.files | length > 0
+
+- name: Link configs to HOME
+  file:
+    src: ".config/zsh/.zshenv"
+    dest: "{{ ansible_user_dir }}/.zshenv"
+    state: link
+    force: true
+
+- name: Change user shell to zsh
+  user:
+    name: "{{ ansible_user_id }}"
+    shell: /bin/zsh

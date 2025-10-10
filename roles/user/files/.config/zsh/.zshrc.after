@@ -1,0 +1,8 @@
+export PROMPT="%B%F{cyan}%n@%M%f%b ${PROMPT}"
+
+lazyload crictl -- 'source <(crictl completion zsh)'
+lazyload kubectl -- 'source <(kubectl completion zsh)'
+lazyload kubeadm -- 'source <(kubeadm completion zsh)'
+lazyload tailscale -- 'source <(tailscale completion zsh)'
+
+alias disks='lsblk -o UUID,PARTUUID,NAME,LABEL,PARTLABEL,TYPE,MOUNTPOINT,SIZE,FSTYPE,FSSIZE'
