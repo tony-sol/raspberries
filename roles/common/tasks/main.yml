@@ -1,0 +1,138 @@
+#SPDX-License-Identifier: MIT-0
+---
+- name: Gathering facts
+  setup:
+    filter:
+      - ansible_device_links
+      - ansible_memory_mb
+      - ansible_user_id
+      - ansible_user_uid
+
+- name: Enable modprobes
+  become: true
+  loop: "{{ common_modprobes + common_modprobes_extras }}"
+  modprobe:
+    name: "{{ item }}"
+    state: present
+    persistent: present
+
+- name: Keeps environment for sudoers
+  become: true
+  copy:
+    src: etc/sudoers.d/000_env-keep
+    dest: /etc/sudoers.d/000_env-keep
+    mode: 0440
+
+- name: Disable admin file in home
+  become: true
+  copy:
+    src: etc/sudoers.d/010_disable-admin-file-in-home
+    dest: /etc/sudoers.d/010_disable-admin-file-in-home
+    mode: 0440
+
+- name: Setup basic environment
+  become: true
+  copy:
+    src: etc/environment
+    dest: /etc/environment
+    mode: 0644
+
+- name: Enable IPv4 packet forwarding
+  become: true
+  copy:
+    src: etc/sysctl.d/90-net.conf
+    dest: /etc/sysctl.d/90-net.conf
+    mode: 0644
+
+- name: Install locales
+  become: true
+  locale_gen:
+    name:
+      - en_US.UTF-8
+      - ru_RU.UTF-8
+    state: present
+
+- name: Install packages
+  become: true
+  loop: "{{ common_packages + common_packages_extras }}"
+  package:
+    name: "{{ item }}"
+    state: latest
+
+- name: Turn off swap
+  become: true
+  command:
+    cmd: swapoff -a
+    removes: /var/swap
+  when: ansible_memory_mb.swap.total > 0
+
+- name: Ensure no swap in fstab
+  become: true
+  mount:
+    name: swap
+    fstype: swap
+    state: absent
+
+- name: Ensure no swapfile
+  become: true
+  file:
+    path: /var/swap
+    state: absent
+
+- name: Ensure swap.target masked
+  become: true
+  systemd_service:
+    name: swap.target
+    enabled: false
+    state: stopped
+    masked: true
+
+- set_fact:
+    disks: "{{ disks | default([]) + dict(ansible_device_links.uuids[item] | zip(ansible_device_links.labels[item])) | dict2items(key_name='uuid', value_name='label') }}"
+  when: item.startswith('sd') or item.startswith('nvme')
+  loop: "{{ ansible_device_links.uuids.keys() }}"
+
+- name: Add disks into fstab
+  become: true
+  loop: "{{ disks }}"
+  mount:
+    state: mounted
+    # @todo migrate uuid > partuuid
+    src: "UUID={{ item.uuid }}"
+    # @todo migrate label > partlabel
+    path: "/media/{{ item.label }}"
+    fstype: exfat
+    opts: defaults,users,nofail
+    dump: 0
+    passno: 0
+  notify: remount
+
+- name: Ensure lingering enabled
+  become: false
+  command:
+    cmd: "loginctl enable-linger {{ ansible_user_uid }}"
+    creates: "/var/lib/systemd/linger/{{ ansible_user_id }}"
+
+- slurp:
+    src: "{{ common_cmdline_path }}"
+  register: _cmdline
+  no_log: true
+
+- name: Populate cmdline.txt with modules
+  set_fact:
+    cmdline: "{{ cmdline + [item] }}"
+  when:
+    - _cmdline is defined
+    - _cmdline != ""
+    - item not in cmdline
+  loop: "{{ common_kernel_modules }}"
+  vars:
+    cmdline: "{{ _cmdline.content | b64decode | split }}"
+
+- name: Write into cmdline
+  become: true
+  copy:
+    content: "{{ cmdline | join(' ') }}\n"
+    dest: "{{ common_cmdline_path }}"
+  when: cmdline is defined
+  notify: reboot

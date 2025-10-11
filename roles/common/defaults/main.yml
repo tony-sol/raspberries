@@ -1,0 +1,29 @@
+#SPDX-License-Identifier: MIT-0
+---
+common_modprobes:
+  - br_netfilter
+
+common_modprobes_extras: []
+
+common_packages:
+  - ca-certificates
+  - curl
+  - git
+  - gpg
+  - nmap
+  - openssh-client
+  - openssh-server
+  - openssh-sftp-server
+  - prometheus-node-exporter
+
+common_packages_extras: []
+
+common_cmdline_path: /boot/firmware/cmdline.txt
+
+common_kernel_modules:
+  - cgroup_enable=memory
+  - cgroup_enable=cpu
+  - cgroup_enable=cpuset
+  - cgroup_enable=devices
+  - cgroup_enable=freezer
+  - cgroup_enable=pids

@@ -1,0 +1,13 @@
+#SPDX-License-Identifier: MIT-0
+---
+- reboot:
+  become: true
+  listen: reboot
+
+- mount:
+    state: remounted
+    # @todo migrate label > partlabel
+    path: "/media/{{ item.label }}"
+  become: false
+  loop: "{{ disks }}"
+  listen: remount
