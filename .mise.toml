@@ -2,6 +2,13 @@
 ansible = "latest"
 doggo = "latest"
 gron = "latest"
+helm = "latest"
+krew = "latest"
+kube-linter = "latest"
+kubectl = "latest"
 ripgrep = "latest"
 task = "latest"
 yq = "latest"
+
+[env]
+KUBECONFIG = "{{ config_root }}/.kube/config:{{ env.KUBECONFIG }}"
