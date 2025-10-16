@@ -12,3 +12,32 @@ yq = "latest"
 
 [env]
 KUBECONFIG = "{{ config_root }}/.kube/config:{{ env.KUBECONFIG }}"
+
+[tasks.ping]
+description = "Ping host"
+usage = """
+arg "<host>" help="Target host" default="all"
+"""
+run = """
+ansible --module-name ping "${usage_host?}"
+"""
+
+[tasks.remount-disks]
+description = "Remount disk as ansible user"
+usage = """
+arg "<mountpoint>" help="Disk mountpoint"
+arg "<host>" help="Target host" default="all"
+"""
+run = """
+ansible --module-name mount --args "state=remounted path=/media/${usage_mountpoint?}" "${usage_host?}"
+"""
+
+[tasks.authorized-keys]
+description = "Copy authorized_keys from user to root"
+usage = """
+arg "<user>" help="User to fetc authorized_keys"
+arg "<host>" help="Target host" default="all"
+"""
+run = """
+ansible --module-name copy --args "remote_src=true src=/home/${usage_user?}/.ssh/authorized_keys dest=/root/.ssh/authorized_keys" --become "${usage_host?}"
+"""

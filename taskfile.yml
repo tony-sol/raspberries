@@ -1,0 +1,17 @@
+version: '3'
+
+tasks:
+  ping:*:
+    desc: Ping host
+    cmd: |-
+      ansible --module-name ping {{ index .MATCH 0 | default "all" }}
+
+  remount-disks:*:*:
+    desc: Remount disk as ansible user
+    cmd: |-
+      ansible --module-name mount --args "state=remounted path=/media/{{ index .MATCH 0 }}" {{ index .MATCH 1 | default "all" }}
+
+  authorized-keys:*:*:
+    desc: Copy authorized_keys from user to root
+    cmd: |-
+      ansible --module-name copy --args "remote_src=true src=/home/{{ index .MATCH 0 }}/.ssh/authorized_keys dest=/root/.ssh/authorized_keys" --become {{ index .MATCH 1 | default "all" }}
