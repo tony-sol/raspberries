@@ -1,0 +1,53 @@
+---
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: raspberry-01
+  bindPort: 6443
+nodeRegistration:
+  name: raspberry-01
+  criSocket: unix:///var/run/crio/crio.sock
+  imagePullPolicy: IfNotPresent
+  imagePullSerial: true
+  kubeletExtraArgs:
+    cgroup-driver: systemd
+
+---
+apiVersion: kubeadm.k8s.io/v1beta4
+kind: ClusterConfiguration
+clusterName: kubernetes
+kubernetesVersion: stable
+imageRepository: registry.k8s.io
+controlPlaneEndpoint: raspberry-01:6443
+controllerManager: {}
+networking:
+  dnsDomain: cluster.local
+  serviceSubnet: 10.96.0.0/12
+  podSubnet: 10.244.0.0/16
+apiServer:
+  certSANs:
+  - raspberry-01
+  - raspberry-01.local
+  - raspberry-01.skate-rockhopper.ts.net
+dns: {}
+etcd:
+  local:
+    dataDir: /var/lib/etcd
+proxy: {}
+scheduler: {}
+caCertificateValidityPeriod: 87600h0m0s
+certificateValidityPeriod: 8760h0m0s
+certificatesDir: /etc/kubernetes/pki
+encryptionAlgorithm: RSA-2048
+
+---
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: JoinConfiguration
+discovery:
+  bootstrapToken:
+    apiServerEndpoint: raspberry-01:6443
+    token: {{ .Token }}
+    caCertHashes:
+      - sha256:<hash>
+nodeRegistration:
+  name: {{ .Hostname }}
