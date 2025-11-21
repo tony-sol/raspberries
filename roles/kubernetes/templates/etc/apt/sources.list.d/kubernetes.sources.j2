@@ -1,0 +1,6 @@
+# @see https://github.com/cri-o/packaging/blob/main/README.md#add-the-kubernetes-repository-1
+Types: deb
+URIs: https://pkgs.k8s.io/core:/stable:/{{ kubernetes_version }}/deb/
+Suites: /
+Components:
+Signed-By: {{ keyring }}

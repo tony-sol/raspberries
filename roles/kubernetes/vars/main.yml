@@ -1,0 +1,21 @@
+#SPDX-License-Identifier: MIT-0
+---
+kubernetes_version: "v1.34"
+
+kubernetes_packages:
+  - name: cri-o
+    service: true
+  - name: kubelet
+    service: true
+  - name: kubeadm
+    service: false
+  - name: kubectl
+    service: false
+
+kubernetes_packaging:
+  - url: "https://pkgs.k8s.io/core:/stable:/{{ kubernetes_version }}/deb/Release.key"
+    keyring: "kubernetes-apt-keyring.asc"
+    sources: "kubernetes.sources"
+  - url: "https://download.opensuse.org/repositories/isv:/cri-o:/stable:/{{ kubernetes_version }}/deb/Release.key"
+    keyring: "cri-o-apt-keyring.asc"
+    sources: "cri-o.sources"

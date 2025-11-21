@@ -1,0 +1,40 @@
+#SPDX-License-Identifier: MIT-0
+---
+- name: Download fresh keyrings
+  become: true
+  get_url:
+    url: "{{ item.url }}"
+    dest: "/etc/apt/keyrings/{{ item.keyring }}"
+  loop: "{{ kubernetes_packaging}}"
+
+- name: Copy sources
+  become: true
+  template:
+    src: "etc/apt/sources.list.d/{{ item.sources }}.j2"
+    dest: "/etc/apt/sources.list.d/{{ item.sources }}"
+  loop: "{{ kubernetes_packaging }}"
+  vars:
+    keyring: "/etc/apt/keyrings/{{ item.keyring }}"
+
+- name: Install packages
+  become: true
+  package:
+    name: "{{ item.name }}={{ kubernetes_version | replace('v', '') }}.*"
+    state: present
+    update_cache: true
+  loop: "{{ kubernetes_packages }}"
+
+- name: Hold packages
+  dpkg_selections:
+    name: "{{ item.name }}"
+    selection: hold
+  loop: "{{ kubernetes_packages }}"
+
+- name: Enable services
+  become: true
+  systemd_service:
+    name: "{{ item.name }}"
+    enabled: true
+    state: started
+  loop: "{{ kubernetes_packages }}"
+  when: item.service
