@@ -1,11 +1,13 @@
 [tools]
 ansible = "latest"
+clusterctl = "latest"
 doggo = "latest"
 gron = "latest"
 helm = "latest"
 krew = "latest"
 kube-linter = "latest"
 kubectl = "latest"
+kustomize = "latest"
 ripgrep = "latest"
 task = "latest"
 yq = "latest"

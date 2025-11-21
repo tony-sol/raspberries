@@ -13,3 +13,6 @@
     - role: podman
       tags:
         - podman
+    - role: kubernetes
+      tags:
+        - kubernetes
