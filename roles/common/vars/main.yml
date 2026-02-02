@@ -1,3 +1,44 @@
 #SPDX-License-Identifier: MIT-0
 ---
-# vars file for common
+common_modprobes:
+  - overlay
+  - br_netfilter
+
+common_modprobes_extras: []
+
+common_packages:
+  - ca-certificates
+  - curl
+  - git
+  - gpg
+  - nmap
+  - nvme-cli
+  - openssh-client
+  - openssh-server
+  - openssh-sftp-server
+
+common_packages_extras: []
+
+common_cmdline_path: /boot/firmware/cmdline.txt
+
+common_kernel_modules:
+  - cgroup_enable=memory
+  - cgroup_enable=cpu
+  - cgroup_enable=cpuset
+  - cgroup_enable=devices
+  - cgroup_enable=freezer
+  - cgroup_enable=pids
+
+common_sysctl_parameters:
+  net.bridge.bridge-nf-call-iptables: 1
+  net.bridge.bridge-nf-call-ip6tables: 1
+  net.ipv4.ip_forward: 1
+
+common_sysctl_parameters_extras: []
+
+common_environment:
+  PATH: /usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin
+  LC_ALL: C.UTF-8
+  LANG: ru_RU.UTF-8
+
+common_environment_extras: []

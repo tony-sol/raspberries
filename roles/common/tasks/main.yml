@@ -16,33 +16,55 @@
     state: present
     persistent: present
 
-- name: Keeps environment for sudoers
+- name: Setup apt configs
   become: true
   copy:
-    src: etc/sudoers.d/000_env-keep
-    dest: /etc/sudoers.d/000_env-keep
-    mode: 0440
-
-- name: Disable admin file in home
-  become: true
-  copy:
-    src: etc/sudoers.d/010_disable-admin-file-in-home
-    dest: /etc/sudoers.d/010_disable-admin-file-in-home
-    mode: 0440
-
-- name: Setup basic environment
-  become: true
-  copy:
-    src: etc/environment
-    dest: /etc/environment
+    src: "{{ src }}"
+    dest: "/{{ src }}"
     mode: 0644
+  when: path is exists
+  vars:
+    src: etc/apt/
+    path: "{{ role_path }}/files/{{ src }}"
 
-- name: Enable IPv4 packet forwarding
+- name: Setup sudoers configs
   become: true
   copy:
-    src: etc/sysctl.d/90-net.conf
-    dest: /etc/sysctl.d/90-net.conf
-    mode: 0644
+    src: "{{ src }}"
+    dest: "/{{ src }}"
+    mode: 0440
+  when: path is exists
+  vars:
+    src: etc/sudoers.d/
+    path: "{{ role_path }}/files/{{ src }}"
+
+- name: Setup systemd environment configs
+  become: true
+  copy:
+    src: "{{ src }}"
+    dest: "/{{ src }}"
+    mode: 0440
+  when: path is exists
+  vars:
+    src: etc/environment.d/
+    path: "{{ role_path }}/files/{{ src }}"
+
+- name: Setup global environment
+  become: true
+  lineinfile:
+    path: /etc/environment
+    regexp : "(?i)^{{ item.key }}="
+    line: "{{ item.key | upper }}={{ item.value }}"
+  loop: "{{ common_environment | combine(common_environment_extras) | dict2items }}"
+
+- name: Enable required sysctl parameters
+  become: true
+  loop: "{{ common_sysctl_parameters | combine(common_sysctl_parameters_extras) | dict2items }}"
+  sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    sysctl_file: /etc/sysctl.d/90-net.conf
+    reload: true
 
 - name: Install locales
   become: true
@@ -100,7 +122,7 @@
     # @todo migrate uuid > partuuid
     src: "UUID={{ item.uuid }}"
     # @todo migrate label > partlabel
-    path: "/media/{{ item.label }}"
+    path: "/mnt/{{ item.label }}"
     fstype: exfat
     opts: defaults,users,nofail
     dump: 0
@@ -113,10 +135,10 @@
     cmd: "loginctl enable-linger {{ ansible_user_uid }}"
     creates: "/var/lib/systemd/linger/{{ ansible_user_id }}"
 
-- slurp:
+- name: Fetch current cmdline.txt
+  slurp:
     src: "{{ common_cmdline_path }}"
   register: _cmdline
-  no_log: true
 
 - name: Populate cmdline.txt with modules
   set_fact:

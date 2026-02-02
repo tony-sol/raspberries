@@ -7,7 +7,7 @@
 - mount:
     state: remounted
     # @todo migrate label > partlabel
-    path: "/media/{{ item.label }}"
+    path: "/mnt/{{ item.label }}"
   become: false
   loop: "{{ disks }}"
   listen: remount

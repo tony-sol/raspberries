@@ -9,7 +9,6 @@ kube-linter = "latest"
 kubectl = "latest"
 kustomize = "latest"
 ripgrep = "latest"
-task = "latest"
 yq = "latest"
 
 [env]
