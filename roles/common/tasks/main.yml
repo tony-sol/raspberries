@@ -16,6 +16,13 @@
     state: present
     persistent: present
 
+- name: Setup proxy for apt
+  become: true
+  copy:
+    src: etc/apt/apt.conf.d/99proxy
+    dest: /etc/apt/apt.conf.d/99proxy
+    mode: 0440
+
 - name: Keeps environment for sudoers
   become: true
   copy:
