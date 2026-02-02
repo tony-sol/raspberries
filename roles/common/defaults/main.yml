@@ -11,6 +11,7 @@ common_packages:
   - git
   - gpg
   - nmap
+  - nvme-cli
   - openssh-client
   - openssh-server
   - openssh-sftp-server
